@@ -70,7 +70,7 @@ jscolour.gradientPicker = function(opts) {
       }
     });
 
-    anglePicker.input.bind('change input', function() {
+    angleInput.bind('change input', function() {
       angle = this.value;
       drawBox(true);
     });

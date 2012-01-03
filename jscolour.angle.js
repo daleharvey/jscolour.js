@@ -24,13 +24,14 @@ jscolour.anglePicker = function(opts) {
 
   $wrapper.append($canvas);
   $wrapper.append($input);
-  opts.$domValue.replaceWith($wrapper);
+  opts.$domValue.hide();
+  opts.$domValue.after($wrapper);
 
   var ctx = $canvas[0].getContext('2d');
 
   this.input = $input;
 
-  $input.bind('change input', function() {
+  opts.$domValue.bind('change input', function() {
     angle = this.value;
     draw();
   });
@@ -61,7 +62,8 @@ jscolour.anglePicker = function(opts) {
   });
 
   function setAngle(newAngle) {
-    $input.val(newAngle).trigger('change');
+    opts.$domValue.val(newAngle).trigger('change');
+    $input.val(newAngle);
   }
 
   function draw() {
