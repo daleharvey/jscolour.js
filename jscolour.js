@@ -168,8 +168,14 @@ var jscolour = (function() {
     self.pointer = $dom.find('.pointer');
     self.pointer.css('top', self.y - 5);
 
-    var initColour = /(gradient|url)/.test(opts.$domValue.val())
-      ? 'white' : opts.$domValue.val() || 'white';
+    var initColour = /(gradient|url)/.test(opts.$domValue.val()) ?
+      'white' : opts.$domValue.val();
+
+    if (!initColour || initColour === 'none') {
+      initColour = 'white';
+    }
+    opts.$domStyle.css('background', initColour);
+
     drawGradient(self.slideCtx, initColour);
   };
 
