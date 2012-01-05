@@ -25,7 +25,39 @@ jscolour.gradientPicker = function(opts) {
 
   var selected = null;
   var selectedObj = null;
+
   var stops = [];
+
+  var initialGradient = opts.$domValue.val();
+
+  if (/gradient/.test(initialGradient)) {
+    stops = parseStops(initialGradient);
+  }
+
+  function parseStops(gradient) {
+
+    var tmpstops = [];
+    var tmp = gradient.replace(/^-webkit-linear-gradient\(/, '')
+      .replace(/\)$/, '');
+
+    var deg = tmp.match(/^[0-9]*deg,[ ]*/);
+    tmp = tmp.substr(deg[0].length);
+
+    angle = parseInt(deg[0], 10) - 90;
+    angleInput.val(angle);
+
+    tmp = tmp.split('%,');
+
+    for(var i = 0, len = tmp.length; i < len; i++) {
+      var x = tmp[i].lastIndexOf(' ');
+      tmpstops.push({
+        position: parseInt(tmp[i].substr(x), 10),
+        colour: tmp[i].substr(0, x)
+      });
+    }
+
+    return tmpstops;
+  }
 
   function init() {
 
@@ -40,7 +72,7 @@ jscolour.gradientPicker = function(opts) {
 
     opts.$domStyle.append(wrapper);
 
-    if (!opts.initial) {
+    if (stops.length === 0) {
       stops.push({position: 0, colour: '#FFF'});
       stops.push({position: 100, colour: '#000'});
     }
