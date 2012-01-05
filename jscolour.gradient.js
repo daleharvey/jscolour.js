@@ -5,6 +5,7 @@ jscolour.gradientPicker = function(opts) {
     '.colour-input { margin-top: 5px; border:1px solid black; height: 20px; width:30px; float: left; background: white; }' +
     '.gradient-box { height: 20px; border: 1px solid #000; }' +
     '.gradient-wrapper .angle-picker { float: right; }' +
+    '.stop-delete { margin: 6px; }' +
     '</style>';
 
   $(document.body).append(CSS);
@@ -14,6 +15,9 @@ jscolour.gradientPicker = function(opts) {
   var colourDiv = $('<div>', {'class': 'colour-input', 'disabled': 'disabled'});
 
   var wrapper = $('<div>', {style:'padding-top: 20px;'});
+
+  var deleteButton = $('<input type="button" value="delete" disabled="disabled" ' +
+                       'class="stop-delete" />');
 
   var angleInput = $('<input type="number" />');
   var angle = 0;
@@ -32,6 +36,12 @@ jscolour.gradientPicker = function(opts) {
 
   if (/gradient/.test(initialGradient)) {
     stops = parseStops(initialGradient);
+  }
+
+  function unselectStop() {
+    selected = null;
+    colourDiv.attr('disabled', 'disabled');
+    deleteButton.attr('disabled', 'disabled');
   }
 
   function parseStops(gradient) {
@@ -68,6 +78,7 @@ jscolour.gradientPicker = function(opts) {
 
     wrapper.append(colourDiv);
     wrapper.append(colourInput);
+    wrapper.append(deleteButton);
     wrapper.append(angleInput);
 
     opts.$domStyle.append(wrapper);
@@ -107,6 +118,18 @@ jscolour.gradientPicker = function(opts) {
       drawBox(true);
     });
 
+    deleteButton.bind('mousedown', function() {
+      if (selected !== null) {
+        delete stops[selected];
+        stops = _.filter(stops, function(obj) {
+          return typeof obj !== 'undefined';
+        });
+        unselectStop();
+        drawBox(true);
+        drawStops();
+      }
+    });
+
 
     opts.$domStyle.bind('mousedown', mouseDown);
     box.bind('dblclick', doubleClick);
@@ -141,6 +164,7 @@ jscolour.gradientPicker = function(opts) {
     selected = $obj.data('index');
     $obj.addClass('selected');
     colourDiv.removeAttr('disabled');
+    deleteButton.removeAttr('disabled');
 
     var colour = $obj.css('background-color');
     var width = box.width();
