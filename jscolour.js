@@ -178,7 +178,6 @@ var jscolour = (function() {
     if (!initColour || initColour === 'none') {
       initColour = 'white';
     }
-    opts.$domStyle.css('background', initColour);
 
     drawGradient(self.slideCtx, initColour);
   };
