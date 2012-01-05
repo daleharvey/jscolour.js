@@ -11,11 +11,13 @@ var jscolour = (function() {
     '.jscolour .pointer { position:absolute; right:25px; top:0px; width:0px; ' +
     'height: 0px; border-top: 6px solid transparent; ' +
     'border-bottom: 6px solid transparent; border-left: 6px solid black; }' +
+    '.hv-pointer { position: absolute; height: 10px; width: 10px; background: transparent; pointer-events: none; top: 0px; left: 0px; border-radius: 5px; border: 1px solid #666;}' +
     '</style>';
 
   var pickerHTML = '<div class="jscolour"><div class="jsc-wrapper">' +
     '<img src="data:image/png;base64,' + pickerImg + '" class="hs" />' +
     '<canvas class="hv"></canvas>' +
+    '<div class="hv-pointer"></div>' +
     '<div class="pointer"></div></div>' +
     '<input type="button" class="close" value="close" />' +
     '</div>';
@@ -126,6 +128,7 @@ var jscolour = (function() {
       var data = ctx.getImageData(pix.x, pix.y, pickerWidth, pickerHeight).data;
       var colour = createRGB(data);
       drawGradient(self.slideCtx, colour);
+      self.hvPointer.css({top: pix.y - 5, left: pix.x - 5});
       self.hasChanged();
     };
 
@@ -166,6 +169,7 @@ var jscolour = (function() {
 
     self.slideCtx = $dom.find('.hv')[0].getContext('2d');
     self.pointer = $dom.find('.pointer');
+    self.hvPointer = $dom.find('.hv-pointer');
     self.pointer.css('top', self.y - 5);
 
     var initColour = /(gradient|url|initial)/.test(opts.$domValue.val()) ?
