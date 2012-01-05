@@ -168,7 +168,7 @@ var jscolour = (function() {
     self.pointer = $dom.find('.pointer');
     self.pointer.css('top', self.y - 5);
 
-    var initColour = /(gradient|url)/.test(opts.$domValue.val()) ?
+    var initColour = /(gradient|url|initial)/.test(opts.$domValue.val()) ?
       'white' : opts.$domValue.val();
 
     if (!initColour || initColour === 'none') {
