@@ -77,6 +77,8 @@ var jscolour = (function() {
     this.active = false;
     this.slideActive = false;
 
+    self.offset;
+
     function bound(x, y, width, height) {
       return {
         x: Math.max(Math.min(x, width-1), 0),
@@ -85,17 +87,13 @@ var jscolour = (function() {
     }
 
     function bindMove(e, callback, obj) {
+      self.offset = $dom.find('.jsc-wrapper').offset();
       e.preventDefault();
-      var f = function(e) {
-        if (e.target === obj) {
-          self[callback](e);
-        }
-      };
-      $(document.body).bind('mousemove', f);
+      $(document.body).bind('mousemove', self[callback]);
       $(document.body).bind('mouseup', function() {
         self.active = false;
         self.slideActive = false;
-        $(document.body).unbind('mousemove', f);
+        $(document.body).unbind('mousemove', self[callback]);
       });
       self[callback](e);
     }
@@ -195,7 +193,9 @@ var jscolour = (function() {
     };
 
     this.hsMouseMove = function(e) {
-      var pix = bound(e.offsetX, e.offsetY, pickerWidth, pickerHeight);
+
+      var pix = bound(e.pageX - self.offset.left,
+                      e.pageY - self.offset.top, pickerWidth, pickerHeight);
       var data = ctx.getImageData(pix.x, pix.y, pickerWidth, pickerHeight).data;
       var colour = createRGB(data);
       drawGradient(self.slideCtx, colour);
@@ -204,7 +204,7 @@ var jscolour = (function() {
     };
 
     this.hvMouseMove = function(e) {
-      yVal = bound(e.offsetX, e.offsetY, pickerWidth, pickerHeight).y;
+      yVal = bound(0, e.pageY - self.offset.top, pickerWidth, pickerHeight).y;
       self.pointer.css('top', yVal - 5);
       self.hasChanged();
     };
