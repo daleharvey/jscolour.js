@@ -74,6 +74,9 @@ var jscolour = (function() {
     var $dom = standalone ? opts.$wrapper : $globalPicker;
     var yVal = 0;
 
+    this.active = false;
+    this.slideActive = false;
+
     function bound(x, y, width, height) {
       return {
         x: Math.max(Math.min(x, width-1), 0),
@@ -90,12 +93,26 @@ var jscolour = (function() {
       };
       $(document.body).bind('mousemove', f);
       $(document.body).bind('mouseup', function() {
+        self.active = false;
+        self.slideActive = false;
         $(document.body).unbind('mousemove', f);
       });
       self[callback](e);
     }
 
     function drawGradient(ctx, colour) {
+
+      var colour = /(gradient|url|initial)/.test(colour) ?
+        'white' : colour;
+
+      if (!colour || colour === 'none') {
+        colour = 'white';
+      }
+
+      if (self.slideActive) {
+        return;
+      }
+
       var linear = ctx.createLinearGradient(0, 0, 20, 100);
       linear.addColorStop(0, colour);
       linear.addColorStop(1, 'black');
@@ -147,6 +164,21 @@ var jscolour = (function() {
       return 'rgb(' + pixel[0] + ',' + pixel[1] + ', ' + pixel[2] + ')';
     }
 
+    this.valueChanged = function() {
+
+      drawGradient(self.slideCtx, this.value);
+
+      if (!self.active) {
+        var initRgb = this.value.match(/^rgb\(([0-9]*), *([0-9]*), *([0-9]*)\)$/);
+        if (initRgb) {
+          initRgb.shift();
+          var arr = _.map(initRgb, function(x) { return parseInt(x, 10); });
+          var pos = rgb2pos(arr);
+          self.hvPointer.css({top: pos.y - 5, left: pos.x - 5});
+        }
+      }
+    };
+
     this.show = function() {
       activePicker = self;
       var position = opts.$domValue.offset();
@@ -186,9 +218,12 @@ var jscolour = (function() {
     };
 
     this.hsMouseDown = function(e, obj) {
+      self.active = true;
       bindMove(e, 'hsMouseMove', obj);
     };
     this.hvMouseDown = function(e, obj) {
+      self.active = true;
+      self.slideActive = true;
       bindMove(e, 'hvMouseMove', obj);
     };
 
@@ -206,27 +241,13 @@ var jscolour = (function() {
       opts.$domValue.bind('focus', self.show);
     }
 
+    opts.$domValue.bind('change refresh', self.valueChanged);
     self.slideCtx = $dom.find('.hv')[0].getContext('2d');
     self.pointer = $dom.find('.pointer');
     self.hvPointer = $dom.find('.hv-pointer');
     self.pointer.css('top', self.y - 5);
 
-    var initColour = /(gradient|url|initial)/.test(opts.$domValue.val()) ?
-      'white' : opts.$domValue.val();
-
-    if (!initColour || initColour === 'none') {
-      initColour = 'white';
-    }
-
-    var initRgb = initColour.match(/^rgb\(([0-9]*), *([0-9]*), *([0-9]*)\)$/);
-    if (initRgb) {
-      initRgb.shift();
-      var arr = _.map(initRgb, function(x) { return parseInt(x, 10); });
-      var pos = rgb2pos(arr);
-      self.hvPointer.css({top: pos.y - 5, left: pos.x - 5});
-    }
-
-    drawGradient(self.slideCtx, initColour);
+    opts.$domValue.trigger('refresh');
   };
 
   var bindAll = function() {
