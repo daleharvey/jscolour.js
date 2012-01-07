@@ -210,7 +210,7 @@ var jscolour = (function() {
     };
 
     this.hasChanged = function() {
-      var data = self.slideCtx.getImageData(10, yVal, slideWidth, pickerHeight).data;
+      var data = self.slideCtx.getImageData(0, yVal, slideWidth, pickerHeight).data;
       var colour = createRGB(data);
       opts.$domValue.val(colour);
       opts.$domStyle.css('background-color', colour);
