@@ -36,12 +36,11 @@ var jscolour = (function() {
   var img = new Image();
 
   img.onload = function() {
-
     pickerHeight = canvas.height = img.height;
     pickerWidth = canvas.width = img.width;
     ctx.drawImage(img, 0, 0);
-
   };
+
   img.src = 'data:image/png;base64,' + pickerImg;
 
   function hide() {
@@ -102,6 +101,46 @@ var jscolour = (function() {
       linear.addColorStop(1, 'black');
       ctx.fillStyle = linear;
       ctx.fillRect(0, 0, 20, 100);
+    }
+
+    function rgb2hsv(pixel) {
+
+      var h,s,v;
+      var r = pixel[0] / 255;
+      var g = pixel[1] / 255;
+      var b = pixel[2] / 255;
+
+      var minVal = Math.min(r, g, b);
+      var maxVal = Math.max(r, g, b);
+      var delta = maxVal - minVal;
+
+      v = maxVal;
+
+      if (delta == 0) {
+	h = 0;
+	s = 0;
+      } else {
+	s = delta / maxVal;
+	var del_R = (((maxVal - r) / 6) + (delta / 2)) / delta;
+	var del_G = (((maxVal - g) / 6) + (delta / 2)) / delta;
+	var del_B = (((maxVal - b) / 6) + (delta / 2)) / delta;
+
+	if (r == maxVal) { h = del_B - del_G;}
+	else if (g == maxVal) { h = (1 / 3) + del_R - del_B;}
+	else if (b == maxVal) { h = (2 / 3) + del_G - del_R;}
+
+	if (h < 0) { h += 1;}
+	if (h > 1) { h -= 1;}
+      }
+      return {h:h, s:s, v:v};
+    }
+
+    function rgb2pos(rgb) {
+      var hsv = rgb2hsv(rgb);
+      return {
+        x: Math.round(hsv.h * 180), // pickerWidth
+        y: Math.round((1-(hsv.s)) * 100)//pickerHeight)
+      };
     }
 
     function createRGB(pixel) {
@@ -177,6 +216,14 @@ var jscolour = (function() {
 
     if (!initColour || initColour === 'none') {
       initColour = 'white';
+    }
+
+    var initRgb = initColour.match(/^rgb\(([0-9]*), *([0-9]*), *([0-9]*)\)$/);
+    if (initRgb) {
+      initRgb.shift();
+      var arr = _.map(initRgb, function(x) { return parseInt(x, 10); });
+      var pos = rgb2pos(arr);
+      self.hvPointer.css({top: pos.y - 5, left: pos.x - 5});
     }
 
     drawGradient(self.slideCtx, initColour);
