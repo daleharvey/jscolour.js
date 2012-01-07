@@ -1,14 +1,16 @@
 
 jscolour.gradientPicker = function(opts) {
 
-  var CSS = '<style>' +
+  var CSS = '<style id="gradientCSS">' +
     '.colour-input { margin-top: 5px; border:1px solid black; height: 20px; width:30px; float: left; background: white; }' +
     '.gradient-box { height: 20px; border: 1px solid #000; }' +
     '.gradient-wrapper .angle-picker { float: right; }' +
     '.stop-delete { margin: 6px; }' +
     '</style>';
 
-  $(document.body).append(CSS);
+  if ($('#gradientCSS').length === 0) {
+    $(document.body).append(CSS);
+  }
 
   var box = $('<div>', {'class': 'gradient-box'});
   var domStops = $('<div>', {'class': 'stops'});
