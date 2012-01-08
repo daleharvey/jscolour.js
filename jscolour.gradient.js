@@ -34,10 +34,21 @@ jscolour.gradientPicker = function(opts) {
 
   var stops = [];
 
-  var initialGradient = opts.$domValue.val();
+  function updateGradientFromValue(e, selfUpdated) {
 
-  if (/gradient/.test(initialGradient)) {
-    stops = parseStops(initialGradient);
+    if (selfUpdated) {
+      return;
+    }
+
+    var initialGradient = opts.$domValue.val();
+
+    if (/gradient/.test(initialGradient)) {
+      stops = parseStops(initialGradient);
+    }
+
+    drawBox(false);
+    drawStops();
+
   }
 
   function unselectStop() {
@@ -132,12 +143,11 @@ jscolour.gradientPicker = function(opts) {
       }
     });
 
-
+    opts.$domValue.bind('change', updateGradientFromValue);
     opts.$domStyle.bind('mousedown', mouseDown);
     box.bind('dblclick', doubleClick);
 
-    drawBox(false);
-    drawStops();
+    updateGradientFromValue();
   }
 
 
@@ -222,7 +232,7 @@ jscolour.gradientPicker = function(opts) {
     box.css('background', '-webkit-linear-gradient(0deg, ' + stopsHtml.join(',') + ')');
 
     if (update) {
-      opts.$domValue.val(css).trigger('change');
+      opts.$domValue.val(css).trigger('change', true);
     }
   }
 
