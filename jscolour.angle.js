@@ -31,8 +31,15 @@ jscolour.anglePicker = function(opts) {
 
   this.input = $input;
 
+  $input.bind('change input', function() {
+    angle = this.value;
+    opts.$domValue.val(angle).trigger('change');
+    draw();
+  });
+
   opts.$domValue.bind('change input', function() {
     angle = this.value;
+    $input.val(angle);
     draw();
   });
 

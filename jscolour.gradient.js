@@ -66,8 +66,8 @@ jscolour.gradientPicker = function(opts) {
     var deg = tmp.match(/^[0-9]*deg,[ ]*/);
     tmp = tmp.substr(deg[0].length);
 
-    angle = parseInt(deg[0], 10) - 90;
-    angleInput.val(angle);
+    angle = parseInt(deg[0], 10);
+    angleInput.val(angle).trigger('change');
 
     tmp = tmp.split('%,');
 
