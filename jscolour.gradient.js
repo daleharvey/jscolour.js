@@ -1,6 +1,7 @@
 
 jscolour.gradientPicker = function(opts) {
 
+  var self = this;
   var CSS = '<style id="gradientCSS">' +
     '.colour-input { margin-top: 5px; border:1px solid black; height: 20px; width:30px; float: left; background: white; }' +
     '.gradient-box { height: 20px; border: 1px solid #000; }' +
@@ -43,7 +44,10 @@ jscolour.gradientPicker = function(opts) {
     var initialGradient = opts.$domValue.val();
 
     if (/gradient/.test(initialGradient)) {
-      stops = parseStops(initialGradient);
+      var parse = jscolour.gradientPicker.parseGradient(initialGradient);
+      stops = parse.stops;
+      angle = parse.angle;
+      angleInput.val(parse.angle).trigger('change');
     }
 
     drawBox(false);
@@ -55,31 +59,6 @@ jscolour.gradientPicker = function(opts) {
     selected = null;
     colourDiv.attr('disabled', 'disabled');
     deleteButton.attr('disabled', 'disabled');
-  }
-
-  function parseStops(gradient) {
-
-    var tmpstops = [];
-    var tmp = gradient.replace(/^-webkit-linear-gradient\(/, '')
-      .replace(/\)$/, '');
-
-    var deg = tmp.match(/^[0-9]*deg,[ ]*/);
-    tmp = tmp.substr(deg[0].length);
-
-    angle = parseInt(deg[0], 10);
-    angleInput.val(angle).trigger('change');
-
-    tmp = tmp.split('%,');
-
-    for(var i = 0, len = tmp.length; i < len; i++) {
-      var x = tmp[i].lastIndexOf(' ');
-      tmpstops.push({
-        position: parseInt(tmp[i].substr(x), 10),
-        colour: tmp[i].substr(0, x)
-      });
-    }
-
-    return tmpstops;
   }
 
   function init() {
@@ -152,7 +131,8 @@ jscolour.gradientPicker = function(opts) {
 
 
   function doubleClick(e) {
-    stops.push({position: Math.round((e.offsetX / box.width()) * 100), colour: '#666'});
+    var x = e.offsetX || (e.clientX - $(e.target).offset().left);
+    stops.push({position: Math.round((x / box.width()) * 100), colour: '#666'});
     drawBox(true);
     drawStops();
   }
@@ -210,29 +190,23 @@ jscolour.gradientPicker = function(opts) {
     drawBox(true);
   }
 
+  // function generateCSS(angle, stops) {
+
+  // }
+
   function drawBox(update) {
 
-    var stopsHtml = [];
+    var gradient = jscolour.gradientPicker.generateCSS(angle, stops);
+    var preview = jscolour.gradientPicker.generateCSS(0, stops);
 
-    var tmp = stops.slice(0);
-    tmp.sort(function(a, b) {
-      return a.position > b.position;
-    });
-
-    $.each(tmp, function(i, x) {
-      stopsHtml.push(x.colour + ' ' + x.position + '%');
-    });
-
-    var x = parseInt(angle, 10) + 90;
-    if (x > 360) {
-      x -= 360;
+    if ($.browser.webkit) {
+      box.css('background', preview.webkit);
+    } else {
+      box.css('background', preview.moz);
     }
 
-    var css = '-webkit-linear-gradient(' + x + 'deg, ' + stopsHtml.join(',') + ')';
-    box.css('background', '-webkit-linear-gradient(0deg, ' + stopsHtml.join(',') + ')');
-
     if (update) {
-      opts.$domValue.val(css).trigger('change', true);
+      opts.$domValue.val(gradient.w3c).trigger('change', true);
     }
   }
 
@@ -258,5 +232,50 @@ jscolour.gradientPicker = function(opts) {
   }
 
   init();
+
+};
+
+jscolour.gradientPicker.generateCSS = function(angle, stops) {
+
+  var stopsHtml = [];
+  var tmp = stops.slice(0);
+  tmp.sort(function(a, b) { return a.position > b.position; });
+
+  $.each(tmp, function(i, x) {
+    stopsHtml.push(x.colour + ' ' + x.position + '%');
+  });
+
+  return {
+    w3c: '-linear-gradient(' + angle + 'deg, ' + stopsHtml.join(',') + ')',
+    webkit: '-webkit-linear-gradient(' + angle + 'deg, ' + stopsHtml.join(',') + ')',
+    moz: '-moz-linear-gradient(' + angle + 'deg, ' + stopsHtml.join(',') + ')'
+  };
+
+};
+
+
+jscolour.gradientPicker.parseGradient = function(gradient) {
+
+  var tmpstops = [];
+  var tmp = gradient.replace(/^-((webkit|moz)-)*linear-gradient\(/, '').replace(/\)$/, '');
+  var deg = tmp.match(/^[0-9]*deg,[ ]*/);
+  tmp = tmp.substr(deg[0].length);
+
+  var tmpangle = parseInt(deg[0], 10);
+
+  tmp = tmp.split('%,');
+
+  for(var i = 0, len = tmp.length; i < len; i++) {
+    var x = tmp[i].lastIndexOf(' ');
+    tmpstops.push({
+      position: parseInt(tmp[i].substr(x), 10),
+      colour: tmp[i].substr(0, x)
+    });
+  }
+
+  return {
+    stops: tmpstops,
+    angle: tmpangle
+  };
 
 };
