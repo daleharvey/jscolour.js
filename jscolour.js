@@ -164,6 +164,7 @@ var jscolour = (function() {
 
     this.valueChanged = function() {
 
+      opts.$domStyle.css('background-color', this.value);
       drawGradient(self.slideCtx, this.value);
 
       if (!self.active) {
