@@ -55,7 +55,11 @@ jscolour.anglePicker = function(opts) {
     function mouseMove(e) {
       var dx = e.pageX - center.left;
       var dy = e.pageY - center.top;
-      setAngle(Math.round(- Math.atan2(dx, dy) * (180 / Math.PI) + 180));
+      var angle = Math.round(- Math.atan2(dx, dy) * (180 / Math.PI) + 90);
+      if (angle < 0) {
+        angle += 360;
+      }
+      setAngle(angle);
     }
 
     mouseMove(e);
@@ -75,7 +79,7 @@ jscolour.anglePicker = function(opts) {
 
   function draw() {
 
-    var angleRad = (angle - 90) * Math.PI / 180;
+    var angleRad = (angle) * Math.PI / 180;
 
     var point = {
       y: (opts.size / 2) + (14 * Math.sin(angleRad)),
@@ -93,6 +97,6 @@ jscolour.anglePicker = function(opts) {
     ctx.stroke();
   }
 
-  draw();
+  $input.trigger('change');
 
 };

@@ -22,8 +22,8 @@ jscolour.gradientPicker = function(opts) {
   var deleteButton = $('<input type="button" value="delete" disabled="disabled" ' +
                        'class="stop-delete" />');
 
-  var angleInput = $('<input type="number" />');
-  var angle = 0;
+  var angleInput = $('<input type="number" value="270" />');
+  var angle = 270;
 
   var colourInput = $('<input>', {
     'type': 'color',
